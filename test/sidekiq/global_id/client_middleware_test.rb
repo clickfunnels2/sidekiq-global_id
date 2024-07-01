@@ -33,7 +33,7 @@ module Sidekiq
       end
 
       def test_serializing_arrays_of_models
-        enqueue(user, "Bilbo Baggins", { user: user }, [user, user])
+        enqueue(user, "Bilbo Baggins", { "user" => user }, [user, user])
 
         job = TestWorker.jobs.first
         args = job["args"].last
@@ -51,7 +51,7 @@ module Sidekiq
       end
 
       def test_serializing_options_hashes
-        enqueue(user, "Bilbo Baggins", { user: user, user => "1" })
+        enqueue(user, "Bilbo Baggins", { "user" => user, user => "1" })
 
         job = TestWorker.jobs.first
         options = job.dig("args", 2)
