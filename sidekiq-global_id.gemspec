@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "globalid"
-  spec.add_dependency "sidekiq"
+  spec.add_dependency "sidekiq", "~> 6.0"
 
   spec.add_development_dependency "appraisal"
 end
