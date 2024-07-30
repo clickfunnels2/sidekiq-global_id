@@ -6,6 +6,7 @@ module Sidekiq
   module GlobalID
     # A simple Sidekiq client middleware that serializes arguments as GlobalIDs
     class ClientMiddleware
+      include Middleware
       include Sidekiq::ClientMiddleware
 
       using Serialization
@@ -21,10 +22,13 @@ module Sidekiq
       #
       # @return [void]
       def call(_worker, job, _queue, _pool)
-        job["args"].map!(&:serialize)
+        # ActiveJob has its own serialization mechanism for GlobalID
+        unless active_job?(job)
+          job["args"].map!(&:serialize)
 
-        if job.key?("cattr")
-          job["cattr"] = job["cattr"].dup&.serialize
+          if job.key?("cattr")
+            job["cattr"] = job["cattr"].dup&.serialize
+          end
         end
 
         yield

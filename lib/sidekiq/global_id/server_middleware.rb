@@ -6,6 +6,7 @@ module Sidekiq
   module GlobalID
     # A simple Sidekiq server middleware that deserializes GlobalIDs as positional arguments.
     class ServerMiddleware
+      include Middleware
       include Sidekiq::ServerMiddleware
 
       using Serialization
@@ -20,10 +21,13 @@ module Sidekiq
       #
       # @return [void]
       def call(_worker, job, _queue)
-        job["args"].map!(&:deserialize)
+        # ActiveJob has its own serialization mechanism for GlobalID
+        unless active_job?(job)
+          job["args"].map!(&:deserialize)
 
-        if job.key?("cattr")
-          job["cattr"] = job["cattr"]&.deserialize
+          if job.key?("cattr")
+            job["cattr"] = job["cattr"]&.deserialize
+          end
         end
 
         yield

@@ -2,6 +2,7 @@
 
 require "sidekiq"
 
+require_relative "global_id/middleware"
 require_relative "global_id/client_middleware"
 require_relative "global_id/server_middleware"
 require_relative "global_id/version"
