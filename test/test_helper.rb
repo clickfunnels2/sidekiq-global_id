@@ -17,6 +17,7 @@ begin
 rescue LoadError # rubocop:disable Lint/SuppressedException
 end
 
+require "cgi"
 require "sidekiq/global_id"
 
 require_relative "support/assertions"

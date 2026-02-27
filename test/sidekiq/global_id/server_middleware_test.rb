@@ -58,6 +58,61 @@ module Sidekiq
         assert opts.key?(user)
       end
 
+      def test_deserializing_cattr
+        gid = String(user.to_gid)
+        job = { "args" => ["test"], "cattr" => { "current_user" => gid } }
+
+        call_middleware(job)
+
+        assert_equal user, job["cattr"]["current_user"]
+      end
+
+      def test_no_error_when_cattr_absent
+        job = { "args" => ["test"] }
+
+        call_middleware(job)
+
+        refute job.key?("cattr")
+      end
+
+      def test_skipping_args_deserialization_for_active_job
+        gid = String(user.to_gid)
+        job = {
+          "class" => "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper",
+          "args" => [gid]
+        }
+
+        call_middleware(job)
+
+        assert_equal gid, job["args"].first,
+          "args should not be deserialized for ActiveJob jobs"
+      end
+
+      def test_deserializing_cattr_for_active_job
+        gid = String(user.to_gid)
+        job = {
+          "class" => "ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper",
+          "args" => [gid],
+          "cattr" => { "current_user" => gid }
+        }
+
+        call_middleware(job)
+
+        assert_equal gid, job["args"].first,
+          "args should not be deserialized for ActiveJob jobs"
+        assert_equal user, job["cattr"]["current_user"],
+          "cattr should be deserialized even for ActiveJob jobs"
+      end
+
+      def test_yields_to_next_middleware
+        job = { "args" => [] }
+        yielded = false
+
+        middleware.call("MyWorker", job, "default") { yielded = true }
+
+        assert yielded
+      end
+
       def call_middleware(job)
         middleware.call("MyWorker", job, "default", &-> {})
       end
