@@ -25,10 +25,10 @@ module Sidekiq
         # ActiveJob has its own serialization mechanism for GlobalID
         unless active_job?(job)
           job["args"].map!(&:serialize)
+        end
 
-          if job.key?("cattr")
-            job["cattr"] = job["cattr"].dup&.serialize
-          end
+        if job.key?("cattr")
+          job["cattr"] = job["cattr"].dup&.serialize
         end
 
         yield
